@@ -89,8 +89,8 @@ const SavedNotes = ({ onClose }) => {
             <Tbody>
               {savedNotes
                 .sort((a, b) => {
-                  const dateA = new Date(a.date_created).getTime();
-                  const dateB = new Date(b.date_created).getTime();
+                  const dateA = new Date(a.created_at).getTime();
+                  const dateB = new Date(b.created_at).getTime();
                   return dateA < dateB ? 1 : -1;
                 })
                 .map((savedNote) => (
@@ -104,7 +104,7 @@ const SavedNotes = ({ onClose }) => {
                         Link <ExternalLinkIcon mx="2px" aria-label="External link icon" />
                       </Link>
                     </Td>
-                    <Td>{dayjs(savedNote.date_created).format("MMMM D, YYYY h:mm A")}</Td>
+                    <Td>{dayjs(savedNote.created_at).format("MMMM D, YYYY h:mm A")}</Td>
                     <Td>
                       <Icon
                         aria-label="Delete icon"

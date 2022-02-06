@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { Box, IconButton, Tooltip, useToast } from "@chakra-ui/react";
-import { v4 as uuidv4 } from "uuid";
 import { FiCopy, FiEdit, FiInfo, FiLink, FiSave, FiBookmark } from "react-icons/fi";
-import axios from "redaxios";
+// import axios from "redaxios";
 import { useRouter } from "next/router";
-import dayjs from "dayjs";
+// import dayjs from "dayjs";
 
 import About from "./About";
 import SavedNotes from "./SavedNotes";
-import CONSTANTS from "../helpers/constants";
-import { useNoteStore, useUuidStore } from "../store/index";
+// import CONSTANTS from "../helpers/constants";
+import { useNoteStore } from "../store/index";
+import supabase from "../utils/supabaseClient";
 
 const Sidebar = () => {
   const router = useRouter();
-  const { setUuid } = useUuidStore();
   const { note, setNote, doesSavedNoteExists, setIsEditing, setIsSaving, setDoesSavedNoteExists } =
     useNoteStore();
   const toast = useToast();
@@ -36,8 +35,7 @@ const Sidebar = () => {
     return router.pathname.split("/")[1].length !== 0;
   };
 
-  const handleSave = () => {
-    const uuid = uuidv4();
+  const handleSave = async () => {
     if (note.trim().length === 0) {
       toast({
         title: "Please enter a note",
@@ -48,39 +46,28 @@ const Sidebar = () => {
     } else {
       if (!noteExists()) {
         setIsSaving(true);
-        axios
-          .post(`${CONSTANTS.NODE_URL}/note/${uuid}`, {
-            note,
-          })
-          .then(() => {
-            const notes = localStorage.getItem("notesbin_notes");
-            if (!notes) {
-              localStorage.setItem(
-                "notesbin_notes",
-                JSON.stringify([
-                  { id: 1, note_url: window.location + uuid, date_created: dayjs().format() },
-                ])
-              );
-            } else {
-              let newNotes = JSON.parse(notes);
-              newNotes.push({
-                id: newNotes[newNotes.length - 1].id + 1,
-                note_url: window.location + uuid,
-                date_created: dayjs().format(),
-              });
-              localStorage.setItem("notesbin_notes", JSON.stringify(newNotes));
-            }
-            setUuid(uuid);
-            router.push(`/${uuid}`);
-          })
-          .catch(() =>
-            toast({
-              title: "An unexpected error occurred while adding the note",
-              status: "error",
-              duration: 3500,
-              isClosable: true,
-            })
-          );
+        try {
+          const response = await supabase.from("notesbin").insert({ note });
+          const notes = localStorage.getItem("notesbin_notes");
+          if (!notes) {
+            localStorage.setItem("notesbin_notes", JSON.stringify([response.data[0]]));
+          } else {
+            const notesArray = JSON.parse(notes);
+            notesArray.push(response.data[0]);
+            localStorage.setItem("notesbin_notes", JSON.stringify(notesArray));
+          }
+          setIsSaving(false);
+          router.push(`/${response.data[0].uuid}`);
+        } catch (err) {
+          toast({
+            title: `${err.message}`,
+            status: "error",
+            duration: 2500,
+            isClosable: true,
+          });
+        } finally {
+          setIsSaving(false);
+        }
       }
     }
   };

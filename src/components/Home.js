@@ -1,15 +1,13 @@
 import { useEffect, useRef } from "react";
 import { Textarea } from "@chakra-ui/react";
 
-import { useUuidStore, useNoteStore } from "../store/index";
+import { useNoteStore } from "../store/index";
 
 const Home = () => {
   const textArea = useRef();
   const { setNote, note, isSaving } = useNoteStore();
-  const { setUuid } = useUuidStore();
 
   useEffect(() => {
-    setUuid("");
     textArea.current.focus();
   }, []);
 

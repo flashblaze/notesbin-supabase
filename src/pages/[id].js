@@ -1,32 +1,32 @@
 import Highlight from "react-highlight";
 import "highlight.js/styles/atom-one-dark.css";
 import { useEffect } from "react";
-import axios from "redaxios";
-import { SkeletonText, useToast } from "@chakra-ui/react";
+import { Box, SkeletonText, useToast } from "@chakra-ui/react";
 
 import { useNoteStore } from "../store/index";
-import CONSTANTS from "../helpers/constants";
 import Layout from "../components/Layout";
 import SEO from "./seo";
+import supabase from "../utils/supabaseClient";
 
 export const getServerSideProps = async ({ query }) => {
   try {
-    const res = await axios.get(`${CONSTANTS.NODE_URL}/${query.id}`);
+    const res = await supabase.from("notesbin").select().match({ uuid: query.id });
     return {
       props: {
-        note: res.data.note,
+        note: res.data[0].note,
       },
     };
   } catch (err) {
     return {
       props: {
         err: true,
+        message: err.message,
       },
     };
   }
 };
 
-const Post = ({ note, err }) => {
+const Post = ({ note, err, message }) => {
   const { setNote } = useNoteStore();
   const toast = useToast();
 
@@ -35,9 +35,9 @@ const Post = ({ note, err }) => {
       setNote(note);
     } else if (err) {
       toast({
-        title: "An unexpected error occurred while fetching the note",
+        title: message,
         status: "error",
-        duration: 3500,
+        duration: 2500,
         isClosable: true,
       });
     }
@@ -46,9 +46,9 @@ const Post = ({ note, err }) => {
   return (
     <Layout>
       <SEO slug="id" description="id" />
-      <div
-        style={{
-          color: "#FFFFFF",
+      <Box
+        sx={{
+          color: "#fff",
           marginLeft: "0.5rem",
           overflowY: "auto",
           height: "calc(100vh - 77px - 1rem)",
@@ -68,7 +68,7 @@ const Post = ({ note, err }) => {
             width={[200, 200, 500, 500]}
           />
         )}
-      </div>
+      </Box>
     </Layout>
   );
 };
