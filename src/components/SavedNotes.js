@@ -37,7 +37,7 @@ const SavedNotes = ({ onClose }) => {
   }, []);
 
   const deleteNote = (id) => {
-    let savedNotesCopy = savedNotes.filter((savedNote) => savedNote.id !== id);
+    let savedNotesCopy = savedNotes.filter((savedNote) => savedNote.uuid !== id);
     setSavedNotes(savedNotesCopy);
     if (savedNotesCopy.length === 0) {
       localStorage.removeItem("notesbin_notes");
@@ -94,13 +94,9 @@ const SavedNotes = ({ onClose }) => {
                   return dateA < dateB ? 1 : -1;
                 })
                 .map((savedNote) => (
-                  <Tr key={savedNote.id}>
+                  <Tr key={savedNote.uuid}>
                     <Td>
-                      <Link
-                        href={savedNote.note_url}
-                        isExternal
-                        d="inline-flex"
-                        alignItems="center">
+                      <Link href={savedNote.uuid} isExternal d="inline-flex" alignItems="center">
                         Link <ExternalLinkIcon mx="2px" aria-label="External link icon" />
                       </Link>
                     </Td>
@@ -110,7 +106,7 @@ const SavedNotes = ({ onClose }) => {
                         aria-label="Delete icon"
                         as={FiTrash}
                         {...iconStyles}
-                        onClick={() => deleteNote(savedNote.id)}
+                        onClick={() => deleteNote(savedNote.uuid)}
                       />
                     </Td>
                   </Tr>
