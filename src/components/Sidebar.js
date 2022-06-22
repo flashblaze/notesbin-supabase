@@ -56,7 +56,6 @@ const Sidebar = () => {
             notesArray.push(response.data[0]);
             localStorage.setItem("notesbin_notes", JSON.stringify(notesArray));
           }
-          setIsSaving(false);
           router.push(`/${response.data[0].uuid}`);
         } catch (err) {
           toast({
