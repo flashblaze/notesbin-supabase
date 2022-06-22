@@ -1,4 +1,3 @@
-import Highlight from "react-highlight";
 import "highlight.js/styles/atom-one-dark.css";
 import { useEffect } from "react";
 import { Box, SkeletonText, useToast } from "@chakra-ui/react";
@@ -9,11 +8,12 @@ import SEO from "./seo";
 import supabase from "../utils/supabaseClient";
 
 export const getServerSideProps = async ({ query }) => {
+  const hljs = require("highlight.js");
   try {
     const res = await supabase.from("notesbin").select().match({ uuid: query.id });
     return {
       props: {
-        note: res.data[0].note,
+        note: hljs.highlightAuto(res.data[0].note).value,
       },
     };
   } catch (err) {
@@ -56,7 +56,7 @@ const Post = ({ note, err, message }) => {
           width: "100%",
         }}>
         {!err && note && note.length !== 0 ? (
-          <Highlight className="autodetect">{note}</Highlight>
+          <pre dangerouslySetInnerHTML={{ __html: note }} />
         ) : err ? (
           <span />
         ) : (
