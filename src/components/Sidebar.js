@@ -64,7 +64,6 @@ const Sidebar = () => {
             duration: 2500,
             isClosable: true,
           });
-        } finally {
           setIsSaving(false);
         }
       }
