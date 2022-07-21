@@ -26,7 +26,7 @@ import { useNoteStore } from "../store/index";
 
 const SavedNotes = ({ onClose }) => {
   const [savedNotes, setSavedNotes] = useState([]);
-  const { setDoesSavedNoteExists } = useNoteStore();
+  const setDoesSavedNoteExists = useNoteStore((state) => state.setDoesSavedNoteExists);
   const finalRef = useRef();
 
   useEffect(() => {

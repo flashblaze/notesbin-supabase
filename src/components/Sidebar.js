@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Box, IconButton, Tooltip, useToast } from "@chakra-ui/react";
 import { FiCopy, FiEdit, FiInfo, FiLink, FiSave, FiBookmark } from "react-icons/fi";
-// import axios from "redaxios";
 import { useRouter } from "next/router";
-// import dayjs from "dayjs";
+import shallow from "zustand/shallow";
 
 import About from "./About";
 import SavedNotes from "./SavedNotes";
@@ -13,8 +12,26 @@ import supabase from "../utils/supabaseClient";
 
 const Sidebar = () => {
   const router = useRouter();
-  const { note, setNote, doesSavedNoteExists, setIsEditing, setIsSaving, setDoesSavedNoteExists } =
-    useNoteStore();
+  const {
+    note,
+    rawNote,
+    setNote,
+    setRawNote,
+    doesSavedNoteExists,
+    setIsSaving,
+    setDoesSavedNoteExists,
+  } = useNoteStore(
+    (state) => ({
+      note: state.note,
+      setNote: state.setNote,
+      rawNote: state.rawNote,
+      setRawNote: state.setRawNote,
+      doesSavedNoteExists: state.doesSavedNoteExists,
+      setIsSaving: state.setIsSaving,
+      setDoesSavedNoteExists: state.setDoesSavedNoteExists,
+    }),
+    shallow
+  );
   const toast = useToast();
   const [showAbout, setShowAbout] = useState(false);
   const [showSavedNotes, setShowSavedNotes] = useState(false);
@@ -56,6 +73,7 @@ const Sidebar = () => {
             notesArray.push(response.data[0]);
             localStorage.setItem("notesbin_notes", JSON.stringify(notesArray));
           }
+          setRawNote(note);
           router.push(`/${response.data[0].uuid}`);
         } catch (err) {
           toast({
@@ -64,6 +82,7 @@ const Sidebar = () => {
             duration: 2500,
             isClosable: true,
           });
+        } finally {
           setIsSaving(false);
         }
       }
@@ -93,7 +112,7 @@ const Sidebar = () => {
 
   const handleCopyNote = () => {
     navigator.clipboard
-      .writeText(note)
+      .writeText(rawNote)
       .then(() => {
         toast({
           title: "Note copied",
@@ -113,8 +132,7 @@ const Sidebar = () => {
   };
 
   const handleEditNote = () => {
-    setIsEditing(true);
-    setNote(note);
+    setNote(rawNote);
     router.push("/");
   };
 

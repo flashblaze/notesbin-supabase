@@ -6,6 +6,7 @@ import { useNoteStore } from "../store/index";
 import Layout from "../components/Layout";
 import SEO from "./seo";
 import supabase from "../utils/supabaseClient";
+import shallow from "zustand/shallow";
 
 export const getServerSideProps = async ({ query }) => {
   const hljs = require("highlight.js");
@@ -13,6 +14,7 @@ export const getServerSideProps = async ({ query }) => {
     const res = await supabase.from("notesbin").select().match({ uuid: query.id });
     return {
       props: {
+        rawNote: res.data[0].note,
         note: hljs.highlightAuto(res.data[0].note).value,
       },
     };
@@ -26,12 +28,16 @@ export const getServerSideProps = async ({ query }) => {
   }
 };
 
-const Post = ({ note, err, message }) => {
-  const { setNote } = useNoteStore();
+const Post = ({ rawNote, note, err, message }) => {
+  const { setNote, setRawNote } = useNoteStore(
+    (state) => ({ setNote: state.setNote, setRawNote: state.setRawNote }),
+    shallow
+  );
   const toast = useToast();
 
   useEffect(() => {
-    if (note) {
+    if (note && rawNote) {
+      setRawNote(rawNote);
       setNote(note);
     } else if (err) {
       toast({
@@ -41,7 +47,7 @@ const Post = ({ note, err, message }) => {
         isClosable: true,
       });
     }
-  }, []);
+  }, [note, rawNote, err]);
 
   return (
     <Layout>

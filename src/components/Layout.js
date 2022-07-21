@@ -1,15 +1,22 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import Link from "next/link";
+import shallow from "zustand/shallow";
 
 import { useNoteStore } from "../store/index";
 import Sidebar from "./Sidebar";
 
 const Layout = ({ children }) => {
-  const { setNote, setIsEditing } = useNoteStore();
+  const { setNote, setIsSaving } = useNoteStore(
+    (state) => ({
+      setNote: state.setNote,
+      setIsSaving: state.setIsSaving,
+    }),
+    shallow
+  );
 
   const handleHeader = () => {
     setNote("");
-    setIsEditing("");
+    setIsSaving(false);
   };
 
   return (
@@ -23,9 +30,11 @@ const Layout = ({ children }) => {
         d="flex"
         alignItems="center">
         <Link href="/">
-          <Text ml="20" cursor="pointer" fontSize="3xl" userSelect="none" onClick={handleHeader}>
-            notesbin
-          </Text>
+          <a>
+            <Text ml="20" cursor="pointer" fontSize="3xl" userSelect="none" onClick={handleHeader}>
+              notesbin
+            </Text>
+          </a>
         </Link>
       </Box>
       <Flex>
